@@ -2,7 +2,7 @@
 
 int safe_open(const char* pathname, int flags)
 {   
-    int fd = open(pathname, flags, 0666);
+    int fd = open(pathname, flags, 0666); //rights assigning only when creating 
 
     if (fd < 0)
     {

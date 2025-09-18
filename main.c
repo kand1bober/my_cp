@@ -2,25 +2,34 @@
 
 int main(int argc, char* argv[])
 {
-    if (argc < 3)
-    {
-        perror("Wrong using of cp\n");
-        exit(0);
-    }   
+    char opts = parse(argc, argv);
+
+    // if (argc < 3)
+    // {
+    //     perror("Wrong using of cp\n");
+    //     exit(0);
+    // }   
     
-    if (argc == 3) // copy file to fie
+    // if (argc == 3) // copy file to fie
+    // {
+    //     transfer(argv[1], argv[2]);
+    // }
+    // else // copy files to directory 
+    // {
+    //     char pathname[128];
+    //     for (int i = 1; i < argc - 1; i++)
+    //     {
+    //         snprintf(pathname, 128, "%s/%s", argv[argc - 1], argv[i]);  
+    //         transfer(argv[i], pathname);
+    //     }
+    // }
+
+    printf("opts: %d\n", opts);
+    if (MASK_V == (opts & MASK_V))
     {
-        transfer(argv[1], argv[2]);
+        printf("verbous\n");
     }
-    else // copy files to directory 
-    {
-        char pathname[128];
-        for (int i = 1; i < argc - 1; i++)
-        {
-            snprintf(pathname, 128, "%s/%s", argv[argc - 1], argv[i]);  
-            transfer(argv[i], pathname);
-        }
-    }
+
     return 0;
 }
 
