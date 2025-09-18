@@ -14,23 +14,13 @@ int main(int argc, char* argv[])
     }
     else // copy files to directory 
     {
-        int fd_to = safe_open(argv[argc - 1], O_WRONLY | O_DIRECTORY); //open dir
-
-        // int fd_from = 0;
-        // for (int i = 1; i < argc )
-        // {
-        //     fd_from = safe_open(argv[i], O_RDONLY); 
-
-        //     //создать файл с именем dir/староеимя и transfer
-
-        //     //copy(fd_from, fd_to);
-
-
-
-        //     fd_from = 0;
-        // }
+        char pathname[128];
+        for (int i = 1; i < argc - 1; i++)
+        {
+            snprintf(pathname, 128, "%s/%s", argv[argc - 1], argv[i]);  
+            transfer(argv[i], pathname);
+        }
     }
-
     return 0;
 }
 
@@ -56,7 +46,7 @@ ssize_t copy(int fd_from, int fd_to)
 void transfer(const char* path_from, const char* path_to)
 {
     int fd_from = safe_open(path_from, O_RDONLY);
-    int fd_to = safe_open(path_to, O_WRONLY);
+    int fd_to = safe_open(path_to, O_WRONLY | O_CREAT);
 
     copy(fd_from, fd_to);
 
