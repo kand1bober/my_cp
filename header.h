@@ -20,6 +20,7 @@ ssize_t safe_write(int fd, const char* buf, size_t size);
 
 ssize_t copy(int fd_from, int fd_to);
 void transfer(const char* path_from, const char* path_to);
+void configure_and_transfer(const char* path_from, const char* path_to, char opts);
 
 char parse(int argc, char* argv[]);
 

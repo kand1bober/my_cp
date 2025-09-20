@@ -38,6 +38,6 @@ char parse(int argc, char* argv[])
             }
         }
     }
-
+    
     return opts;
 }
