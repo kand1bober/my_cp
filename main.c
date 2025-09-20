@@ -8,24 +8,32 @@ int main(int argc, char* argv[])
     if (MASK_F == (opts & MASK_F))
         opts = 0; // delete all options
 
-    if ((argc - optind + 1) < 3)
+    if ((argc - optind) < 2)
     {
         perror("Wrong using of cp\n");
         exit(0);
     }   
-    
-    if ((argc - optind + 1) == 3) // copy file to fie
+
+    char* lines[argc - optind] = {}; // --verbous lines 
+    int lines_count = 0;
+
+    if ((argc - optind) == 2) // copy file to fie
     {
-        configure_and_transfer(argv[optind], argv[optind + 1], opts);
+        configure_and_transfer(argv[optind], argv[optind + 1], opts, lines, &lines_count);
     }
     else // copy files to directory 
     {
-        char pathname[128];
+        char pathname[MAX_PATH_LEN];
         for (int i = optind; i < argc - 1; i++)
         {
-            snprintf(pathname, 128, "%s/%s", argv[argc - 1], argv[i]);  
-            configure_and_transfer(argv[i], pathname, opts);
+            snprintf(pathname, MAX_PATH_LEN, "%s/%s", argv[argc - 1], argv[i]);  
+            configure_and_transfer(argv[i], pathname, opts, lines, &lines_count);
         }
+    }
+
+    if (MASK_V == (opts & MASK_V))
+    {
+        show_verbose(lines, &lines_count);
     }
 
     return 0;
@@ -50,7 +58,7 @@ ssize_t copy(int fd_from, int fd_to)
 }
 
 
-void configure_and_transfer(const char* path_from, const char* path_to, char opts)
+void configure_and_transfer(const char* path_from, const char* path_to, char opts, char** lines, int* lines_count)
 {
     //how to check if such file already exists ?
     if (MASK_I == (opts & MASK_I)) // add checking for already existing files
@@ -61,17 +69,17 @@ void configure_and_transfer(const char* path_from, const char* path_to, char opt
         ans = getchar(); getchar(); // to skip '\n' 
         if (ans == 'y' || ans == '\n')
         {
-            transfer(path_from, path_to);
+            transfer(path_from, path_to, opts, lines, lines_count);
         }
     }
     else 
     {
-        transfer(path_from, path_to);
+        transfer(path_from, path_to, opts, lines, lines_count);
     }
 }
 
 
-void transfer(const char* path_from, const char* path_to)
+void transfer(const char* path_from, const char* path_to, char opts, char** lines, int* lines_count)
 {
 
     int fd_from = safe_open(path_from, O_RDONLY);
@@ -84,14 +92,26 @@ void transfer(const char* path_from, const char* path_to)
 
     if (MASK_V == (opts & MASK_V) )
     {
-        //add to array of lines 
+        size_t len = snprintf(NULL, 0, "'%s' --> '%s'", path_from, path_to) + 1;
 
-        // printf("'%s' --> '%s'\n", path_from, path_to);
+        lines[*lines_count] = (char*)malloc(len); 
+        if (lines[*lines_count] == NULL)
+        {
+            perror("Error in allocating memory\n");
+            exit(1);
+        }
+
+        snprintf(lines[*lines_count], len, "'%s' --> '%s'", path_from, path_to);
+        (*lines_count)++;
     }
 }
 
 
-void show_verbose(char* lines[])
-{
-
+void show_verbose(char** lines, int* lines_count)
+{    
+    for (int i = 0; i < *lines_count; i++)
+    {
+        printf("%s\n", lines[i]);
+        free(lines[i]);
+    }
 }
