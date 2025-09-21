@@ -61,7 +61,7 @@ ssize_t copy(int fd_from, int fd_to)
 void configure_and_transfer(const char* path_from, const char* path_to, char opts, char** lines, int* lines_count)
 {
     //how to check if such file already exists ?
-    if (MASK_I == (opts & MASK_I)) // add checking for already existing files
+    if (MASK_I == (opts & MASK_I) && file_exists(path_to)) // add checking for already existing files
     {
         printf("my_cp: overwrite: '%s' ? y\\n\n", path_to);
 
@@ -79,11 +79,21 @@ void configure_and_transfer(const char* path_from, const char* path_to, char opt
 }
 
 
+bool file_exists(const char* pathname)
+{
+    struct stat info;
+    if (stat(pathname, &info) == 0)
+        return true;
+    else     
+        return false;
+}
+
+
 void transfer(const char* path_from, const char* path_to, char opts, char** lines, int* lines_count)
 {
 
     int fd_from = safe_open(path_from, O_RDONLY);
-    int fd_to = safe_open(path_to, O_WRONLY | O_TRUNC);
+    int fd_to = safe_open(path_to, O_WRONLY | O_TRUNC | O_CREAT);
 
     copy(fd_from, fd_to);
 
