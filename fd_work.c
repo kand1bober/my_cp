@@ -1,8 +1,8 @@
 #include "header.h"
 
-int safe_open(const char* pathname, int flags)
+int safe_open(const char* pathname, int flags, int mode)
 {   
-    int fd = open(pathname, flags, 0666); //rights assigning only when creating 
+    int fd = open(pathname, flags, mode); //rights assigning only when creating 
 
     if (fd < 0)
     {

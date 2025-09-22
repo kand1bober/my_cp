@@ -5,9 +5,6 @@ int main(int argc, char* argv[])
     char opts = parse(argc, argv);
     extern int optind;
 
-    if (MASK_F == (opts & MASK_F))
-        opts = 0; // delete all options
-
     if ((argc - optind) < 2)
     {
         perror("Wrong using of cp");
@@ -32,7 +29,7 @@ int main(int argc, char* argv[])
 }
 
 
-ssize_t copy(int fd_from, int fd_to)
+ssize_t copy(int fd_from, int fd_to, size_t buf_sz)
 {
     if (fd_from < 0 || fd_to < 0)
     {
@@ -40,7 +37,6 @@ ssize_t copy(int fd_from, int fd_to)
         exit(1);
     }
 
-    size_t buf_sz = 4096;
     char buf[buf_sz] = {};
 
     ssize_t read_bytes = safe_read(fd_from, buf, buf_sz);
@@ -51,42 +47,43 @@ ssize_t copy(int fd_from, int fd_to)
 
 
 void configure_and_transfer(const char* path_from, const char* path_to, char opts)
-{
-    if (MASK_I == (opts & MASK_I) && file_exists(path_to)) 
+{    
+    if (file_exists(path_to))
     {
-        printf("my_cp: overwrite: '%s' ? y\\n\n", path_to);
-
-        char ans = 0;
-        ans = getchar(); getchar(); // to skip '\n' 
-        if (ans == 'y' || ans == '\n')
+        if (MASK_I == (opts & MASK_I))
         {
-            transfer(path_from, path_to, opts);
+            printf("my_cp: overwrite: '%s'? [y\\n]\n", path_to);
+
+            char ans = 0;
+            ans = getchar(); getchar(); // to skip '\n' 
+            if (ans == 'y' || ans == '\n')
+            {
+                chmod(path_to, get_file_mode(path_to) | 0666);
+                transfer(path_from, path_to, opts, 0);
+            }
+        }
+        else if (MASK_F == (opts & MASK_F))
+        {
+            chmod(path_to, get_file_mode(path_to) | 0666);
+            transfer(path_from, path_to, opts, 0);
+        }
+        else 
+        {
+            printf("to overwrite file, specify flag -i or -f\n");
+            return; 
         }
     }
     else 
-    {
-        transfer(path_from, path_to, opts);
-    }
+        transfer(path_from, path_to, opts, 0666); //create a file
 }
 
 
-bool file_exists(const char* pathname)
+void transfer(const char* path_from, const char* path_to, char opts, int mode)
 {
-    struct stat info;
-    if (stat(pathname, &info) == 0)
-        return true;
-    else     
-        return false;
-}
+    int fd_from = safe_open(path_from, O_RDONLY, 0);
+    int fd_to = safe_open(path_to, O_WRONLY | O_TRUNC | O_CREAT, mode);
 
-
-void transfer(const char* path_from, const char* path_to, char opts)
-{
-
-    int fd_from = safe_open(path_from, O_RDONLY);
-    int fd_to = safe_open(path_to, O_WRONLY | O_TRUNC | O_CREAT);
-
-    copy(fd_from, fd_to);
+    copy(fd_from, fd_to, get_file_size(path_from));
 
     safe_close(fd_from);
     safe_close(fd_to);

@@ -17,16 +17,28 @@
 
 #define MAX_PATH_LEN 128
 
-int safe_open(const char* pathname, int flags);
+char parse(int argc, char* argv[]);
+
+int safe_open(const char* pathname, int flags, int mode);
+
 void safe_close(int fd);
+
 ssize_t safe_read(int fd, char* buf, size_t buf_sz);
+
 ssize_t safe_write(int fd, const char* buf, size_t size);
 
-ssize_t copy(int fd_from, int fd_to);
-void transfer(const char* path_from, const char* path_to, char opts);
-void configure_and_transfer(const char* path_from, const char* path_to, char opts);
+
 bool file_exists(const char* pathname);
 
-char parse(int argc, char* argv[]);
+size_t get_file_size(const char* pathname);
+
+mode_t get_file_mode(const char* pathname);
+
+
+ssize_t copy(int fd_from, int fd_to, size_t buf_sz);
+
+void transfer(const char* path_from, const char* path_to, char opts, int mode);
+
+void configure_and_transfer(const char* path_from, const char* path_to, char opts);
 
 #endif
