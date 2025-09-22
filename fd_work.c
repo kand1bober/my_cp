@@ -6,7 +6,7 @@ int safe_open(const char* pathname, int flags)
 
     if (fd < 0)
     {
-        perror("Error in opening of file\n");
+        perror("error in open syscall");
         exit(1);
     }
 
@@ -18,28 +18,33 @@ void safe_close(int fd)
 {
     if (close(fd) < 0)
     {
-        perror("Error in cloing file\n");
+        perror("error in close syscall");
         exit(1);
     }
 }
 
 ssize_t safe_read(int fd, char* buf, size_t buf_sz)
 {
-    ssize_t n = 1, read_bytes = 0;
-    while (n > 0)
+    ssize_t n = 0, read_bytes = 0;
+    while (1)
     {   
-        n = read(fd, buf + read_bytes, buf_sz - read_bytes); //read from file
+        n = read(fd, buf + read_bytes, buf_sz - read_bytes);
+
         if (n < 0)
         {
-            perror("Error in reading of file\n");
+            if (errno == EINTR)
+            {
+                n = 0;
+                continue;
+            }
+
+            perror("error in read syscall");
             exit(1);
         }
+        if (n == 0)
+            break;
 
         read_bytes += n;
-
-        if (fd == 0 && *(buf + read_bytes - 1) == '\n')
-            return read_bytes;
-
     }
 
     return read_bytes;
@@ -48,17 +53,26 @@ ssize_t safe_read(int fd, char* buf, size_t buf_sz)
 
 ssize_t safe_write(int fd, const char* buf, size_t size)
 {
-    ssize_t n = 1, written = 0;  
-    while (n > 0)
+    ssize_t n = 0 ,written = 0;
+    while (1)
     {
         n = write(fd, buf + written, size - written);
-        written += n;
 
         if (n < 0)
         {
-            perror("Error in write syscall\n");
+            if (errno == EINTR) 
+            {
+                n = 0;
+                continue;
+            }
+
+            perror("error in write syscall");
             exit(1);
         }
+        if (n == 0)
+            break;
+
+        written += n;
     }
 
     return written;

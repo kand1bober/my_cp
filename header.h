@@ -23,12 +23,10 @@ ssize_t safe_read(int fd, char* buf, size_t buf_sz);
 ssize_t safe_write(int fd, const char* buf, size_t size);
 
 ssize_t copy(int fd_from, int fd_to);
-void transfer(const char* path_from, const char* path_to, char opts, char** lines, int* lines_count);
-void configure_and_transfer(const char* path_from, const char* path_to, char opts, char** lines, int* lines_count);
+void transfer(const char* path_from, const char* path_to, char opts);
+void configure_and_transfer(const char* path_from, const char* path_to, char opts);
 bool file_exists(const char* pathname);
 
 char parse(int argc, char* argv[]);
-
-void show_verbose(char** lines, int* lines_count);
 
 #endif

@@ -10,16 +10,13 @@ int main(int argc, char* argv[])
 
     if ((argc - optind) < 2)
     {
-        perror("Wrong using of cp\n");
+        perror("Wrong using of cp");
         exit(0);
     }   
 
-    char* lines[argc - optind] = {}; // --verbous lines 
-    int lines_count = 0;
-
     if ((argc - optind) == 2) // copy file to fie
     {
-        configure_and_transfer(argv[optind], argv[optind + 1], opts, lines, &lines_count);
+        configure_and_transfer(argv[optind], argv[optind + 1], opts);
     }
     else // copy files to directory 
     {
@@ -27,13 +24,8 @@ int main(int argc, char* argv[])
         for (int i = optind; i < argc - 1; i++)
         {
             snprintf(pathname, MAX_PATH_LEN, "%s/%s", argv[argc - 1], argv[i]);  
-            configure_and_transfer(argv[i], pathname, opts, lines, &lines_count);
+            configure_and_transfer(argv[i], pathname, opts);
         }
-    }
-
-    if (MASK_V == (opts & MASK_V))
-    {
-        show_verbose(lines, &lines_count);
     }
 
     return 0;
@@ -44,7 +36,7 @@ ssize_t copy(int fd_from, int fd_to)
 {
     if (fd_from < 0 || fd_to < 0)
     {
-        perror("Error in opening descriptors\n");
+        perror("Error in opening descriptors");
         exit(1);
     }
 
@@ -58,10 +50,9 @@ ssize_t copy(int fd_from, int fd_to)
 }
 
 
-void configure_and_transfer(const char* path_from, const char* path_to, char opts, char** lines, int* lines_count)
+void configure_and_transfer(const char* path_from, const char* path_to, char opts)
 {
-    //how to check if such file already exists ?
-    if (MASK_I == (opts & MASK_I) && file_exists(path_to)) // add checking for already existing files
+    if (MASK_I == (opts & MASK_I) && file_exists(path_to)) 
     {
         printf("my_cp: overwrite: '%s' ? y\\n\n", path_to);
 
@@ -69,12 +60,12 @@ void configure_and_transfer(const char* path_from, const char* path_to, char opt
         ans = getchar(); getchar(); // to skip '\n' 
         if (ans == 'y' || ans == '\n')
         {
-            transfer(path_from, path_to, opts, lines, lines_count);
+            transfer(path_from, path_to, opts);
         }
     }
     else 
     {
-        transfer(path_from, path_to, opts, lines, lines_count);
+        transfer(path_from, path_to, opts);
     }
 }
 
@@ -89,7 +80,7 @@ bool file_exists(const char* pathname)
 }
 
 
-void transfer(const char* path_from, const char* path_to, char opts, char** lines, int* lines_count)
+void transfer(const char* path_from, const char* path_to, char opts)
 {
 
     int fd_from = safe_open(path_from, O_RDONLY);
@@ -101,27 +92,5 @@ void transfer(const char* path_from, const char* path_to, char opts, char** line
     safe_close(fd_to);
 
     if (MASK_V == (opts & MASK_V) )
-    {
-        size_t len = snprintf(NULL, 0, "'%s' --> '%s'", path_from, path_to) + 1;
-
-        lines[*lines_count] = (char*)malloc(len); 
-        if (lines[*lines_count] == NULL)
-        {
-            perror("Error in allocating memory\n");
-            exit(1);
-        }
-
-        snprintf(lines[*lines_count], len, "'%s' --> '%s'", path_from, path_to);
-        (*lines_count)++;
-    }
-}
-
-
-void show_verbose(char** lines, int* lines_count)
-{    
-    for (int i = 0; i < *lines_count; i++)
-    {
-        printf("%s\n", lines[i]);
-        free(lines[i]);
-    }
+        printf("'%s' --> '%s'\n", path_from, path_to);
 }
