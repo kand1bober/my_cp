@@ -29,7 +29,8 @@ int main(int argc, char* argv[])
 }
 
 
-ssize_t copy(int fd_from, int fd_to, size_t buf_sz)
+#define BUF_SZ 4096
+void copy(int fd_from, int fd_to, size_t file_sz)
 {
     if (fd_from < 0 || fd_to < 0)
     {
@@ -37,13 +38,18 @@ ssize_t copy(int fd_from, int fd_to, size_t buf_sz)
         exit(1);
     }
 
-    char buf[buf_sz] = {};
+    char buf[BUF_SZ] = {};
 
-    ssize_t read_bytes = safe_read(fd_from, buf, buf_sz);
-    ssize_t written = safe_write(fd_to, buf, read_bytes);
+    size_t bytes_sum = 0, n = 0;
+    while (bytes_sum != file_sz)
+    {
+        n = safe_read(fd_from, buf, BUF_SZ);
+        safe_write(fd_to, buf, n);
 
-    return written;
+        bytes_sum += n;
+    }
 }
+#undef BUF_SZ
 
 
 void configure_and_transfer(const char* path_from, const char* path_to, char opts)
@@ -54,9 +60,9 @@ void configure_and_transfer(const char* path_from, const char* path_to, char opt
         {
             printf("my_cp: overwrite: '%s'? [y\\n]\n", path_to);
 
-            char ans = 0;
-            ans = getchar(); getchar(); // to skip '\n' 
-            if (ans == 'y' || ans == '\n')
+            char ans[100];
+            scanf("%100s", ans);
+            if (ans[0] == 'y')
             {
                 chmod(path_to, get_file_mode(path_to) | 0666);
                 transfer(path_from, path_to, opts, 0);

@@ -35,7 +35,7 @@ size_t get_file_size(const char* pathname);
 mode_t get_file_mode(const char* pathname);
 
 
-ssize_t copy(int fd_from, int fd_to, size_t buf_sz);
+void copy(int fd_from, int fd_to, size_t file_sz);
 
 void transfer(const char* path_from, const char* path_to, char opts, int mode);
 
