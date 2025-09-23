@@ -60,8 +60,8 @@ void configure_and_transfer(const char* path_from, const char* path_to, char opt
         {
             printf("my_cp: overwrite: '%s'? [y\\n]\n", path_to);
 
-            char ans[100];
-            scanf("%100s", ans);
+            char ans[101];
+            fgets(ans, 100, stdin);
             if (ans[0] == 'y')
             {
                 chmod(path_to, get_file_mode(path_to) | 0666);
